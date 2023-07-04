@@ -6,32 +6,37 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 
+from citronella import WebPage
+from pages.home import HomePage
+from pages.restaurant import RestaurantDetails
+from pages.search_results import SearchResults
+
 chrome_options = Options()
-chrome_options.add_experimental_option("detach", True)
+# chrome_options.add_experimental_option("detach", True)
 browser = webdriver.Chrome(
       options=chrome_options,
       service=ChromeService(ChromeDriverManager().install()))
-
+web = WebPage(browser)
 # open it the door dash website
 browser.get("http://www.doordash.com/")
 
 # enter delivery address
 # 5401 W Copans Rd, Margate, FL 33063
-browser.find_element(By.ID, "HomeAddressAutocomplete").send_keys("5401 W Copans Rd, Margate, FL 33063")
-time.sleep(5)
-browser.find_element(By.CSS_SELECTOR, "div[data-testid='LandingPageAddressSearch'] button").click()
-time.sleep(10)
+web.page = HomePage
+web.page.delivery_address_field.send_keys("5401 W Copans Rd, Margate, FL 33063")
+time.sleep(3)
+web.page.arrow_button_to_search_address.click()
 # click fast food icon
-browser.find_element(By.XPATH, "//span[.='Fast Food']").click()
-time.sleep(10)
+web.page = SearchResults
+web.page.fast_food_in_filter.click()
 # click on the first restaurant
-browser.find_element(By.CSS_SELECTOR, "a[data-anchor-id='StoreCard']").click()
-time.sleep(10)
+web.page.first_restaurant.click()
 # print out the name of the restaurant
-restaurant_name = browser.find_element(By.CSS_SELECTOR, 'main h1')
-assert restaurant_name.is_displayed(), "Restaurant name not displayed"
+web.page = RestaurantDetails
+restaurant_name = web.page.restaurant_name
+assert web.page.restaurant_name.is_displayed(), "Restaurant name not displayed"
 print(f"Restaurant Selected is: "
-      f"{restaurant_name.text}")
+      f"{web.page.restaurant_name.text}")
 
 # view the menu
 # browser.find_element(By.CSS_SELECTOR, "main button[kind='BUTTON/PRIMARY']").click()
